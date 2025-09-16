@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Default Spring Boot logback configuration -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    
+    <!-- Console Appender -->
+    <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+    
+    <!-- Main application log file -->
+    <appender name="RollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/application.log</file>
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>logs/application.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>7</maxHistory>
+            <totalSizeCap>100MB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+    
+    <!-- Circuit breaker failures log file -->
+    <appender name="CIRCUIT_BREAKER_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/circuit-breaker-failures.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>logs/circuit-breaker-failures.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>7</maxHistory>
+            <totalSizeCap>100MB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+    
+    <!-- User Controller specific appender for console -->
+    <appender name="UserControllerConsole" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d %p [USER-API] %m%n</pattern>
+        </encoder>
+    </appender>
+    
+    <!-- User Controller specific file appender -->
+    <appender name="UserControllerFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/user-controller.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>%d %p [USER-API] %m%n</Pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/archived/user-controller-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+    </appender>
+    
+    <!-- Logger specifically for circuit breaker failures -->
+    <logger name="com.example.demo.aspect.CircuitBreakerLoggingAspect" level="DEBUG" additivity="false">
+        <appender-ref ref="CIRCUIT_BREAKER_FILE" />
+        <appender-ref ref="Console" />
+    </logger>
+    
+    <!-- LOG "com.example.demo*" at DEBUG level -->
+    <logger name="com.example.demo" level="debug" additivity="false">
+        <appender-ref ref="RollingFile" />
+        <appender-ref ref="Console" />
+    </logger>
+    
+    <!-- Specific logger for UserController with custom formatting -->
+    <logger name="UserControllerLogger" level="info" additivity="false">
+        <appender-ref ref="UserControllerFile" />
+        <appender-ref ref="UserControllerConsole" />
+    </logger>
+    
+    <!-- ROOT logger -->
+    <root level="info">
+        <appender-ref ref="RollingFile" />
+        <appender-ref ref="Console" />
+    </root>
+</configuration>
